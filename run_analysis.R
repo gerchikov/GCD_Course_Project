@@ -8,38 +8,38 @@ features <- read.table("UCI HAR Dataset/features.txt", header = F,
                        col.names = c("id", "label"), as.is = T)
 features.interesting <- grepl("-(mean|std)\\(\\)", features$label)
 
+read.dataset <- function(
+  name = "test")  # Must be "test" or "train" for UCI HAR Dataset
+{
+  subject <- read.table(paste0("UCI HAR Dataset/", name, "/subject_", name, ".txt"), 
+                        header = F,
+                        col.names = "id")
+  
+  X <- read.table(paste0("UCI HAR Dataset/", name, "/X_", name, ".txt"),
+                  header = F,
+                  col.names = features[, "label"], 
+                  colClasses = ifelse(features.interesting, numeric(), "NULL"))
+  
+  y <- read.table(paste0("UCI HAR Dataset/", name, "/y_", name, ".txt"),
+                  header = F,
+                  col.names = "id")
+  
+  X$subject.id <- subject$id
+  X$activity.id <- y$id
+  merge(X, activity_labels, by.x = "activity.id", by.y = "id")
+}
+
 # test set:
-subject_test <- read.table("UCI HAR Dataset/test/subject_test.txt", header = F,
-                           col.names = "id")
-
-X_test <- read.table("UCI HAR Dataset/test/X_test.txt", header = F,
-                     col.names = features[, "label"], 
-                     colClasses = ifelse(features.interesting, numeric(), "NULL"))
-
-y_test <- read.table("UCI HAR Dataset/test/y_test.txt", header = F,
-                     col.names = "id")
-
-X_test$subject.id <- subject_test$id
-X_test$activity.id <- y_test$id
-test <- merge(X_test, activity_labels, by.x = "activity.id", by.y = "id")
+test <- read.dataset("test")
 
 # train set:
-subject_train <- read.table("UCI HAR Dataset/train/subject_train.txt", header = F,
-                           col.names = "id")
+train <- read.dataset("train")
 
-X_train <- read.table("UCI HAR Dataset/train/X_train.txt", header = F,
-                     col.names = features[, "label"], 
-                     colClasses = ifelse(features.interesting, numeric(), "NULL"))
-
-y_train <- read.table("UCI HAR Dataset/train/y_train.txt", header = F,
-                     col.names = "id")
-
-X_train$subject.id <- subject_train$id
-X_train$activity.id <- y_train$id
-train <- merge(X_train, activity_labels, by.x = "activity.id", by.y = "id")
-
+# combine sets:
 step4 <- rbind(test, train)
 
+# summarise:
+# (OK, I hate this implementation, but I am *really* out of time, and it works...)
 step5 <- ddply(step4, .(activity.label, subject.id), summarise, 
       tBodyAcc.mean...X = mean(tBodyAcc.mean...X),
       tBodyAcc.mean...Y = mean(tBodyAcc.mean...Y),
@@ -107,5 +107,6 @@ step5 <- ddply(step4, .(activity.label, subject.id), summarise,
       fBodyBodyGyroMag.std.. = mean(fBodyBodyGyroMag.std..),
       fBodyBodyGyroJerkMag.mean.. = mean(fBodyBodyGyroJerkMag.mean..),
       fBodyBodyGyroJerkMag.std.. = mean(fBodyBodyGyroJerkMag.std..))
-      
+
+# write output:      
 write.table(step5, "step5.txt", row.names = FALSE)
