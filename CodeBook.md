@@ -27,3 +27,5 @@ fBodyBodyGyroJerkMag.mean.. fBodyBodyGyroJerkMag.std..
 * activity.label is a factor with levels: LAYING SITTING STANDING WALKING WALKING_DOWNSTAIRS WALKING_UPSTAIRS
 * subject.id is an integer from 1 to 30
 * Every other column is the group average of respective feature variable, see `UCI HAR Dataset\features_info.txt` for more info.
+
+/* Sorry, this is a lame-o CodeBook, but I am really out of time, and all the "real" info would be copy/pasted from the original UCI HAR Dataset, anyway. */
